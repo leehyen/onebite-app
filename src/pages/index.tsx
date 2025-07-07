@@ -2,17 +2,19 @@
 import SearchableLayout from "@/components/searchable-layout";
 import style from "./index.module.css";
 import { ReactNode } from "react";
-import books from "@/mock/books.json"; //@는 src폴더를 가르키는 경로
 import BookItem from "@/components/book-item";
-import { InferGetServerSidePropsType } from "next";
+import { InferGetStaticPropsType } from "next";
 import fetchBooks from "@/lib/fetch-books";
 import fetchRandomBooks from "@/lib/fetch-random-books";
 
-  //getServerSideProps함수는 사전 렌더링을 하는 그 과정에서 딱 한번만 실행히 될꺼기때문에
+  //SSR : getServerSideProps함수는 사전 렌더링을 하는 그 과정에서 딱 한번만 실행히 될꺼기때문에
   // 오직 서버측에서만 실행됨,홈페이지에는 출력안되고 터미널에만 출력됨
-export const getServerSideProps=async()=>{ 
+  //SSG : getStaticProps
+export const getStaticProps=async()=>{ 
   //페이지 역할을 하는 컴포넌트(여기서는 Home)보다 먼저 실행되어서, 컴포넌트에 필요한 데이터 불러오는 함수
   //const data="hello";
+
+  console.log("인덱스 페이지");
   const [allBooks,recoBooks]=await Promise.all([
     fetchBooks(),fetchRandomBooks()
   ]);
@@ -28,12 +30,7 @@ export const getServerSideProps=async()=>{
 //페이지 역할을 하는 Home컴퍼넌트는 사실 서버에서 한 번 먼저 실행되고, 브라우저에서 한번더 실행됨
 export default function Home({
   allBooks,recoBooks,
-} : InferGetServerSidePropsType<typeof getServerSideProps>) { /*home 컴퍼넌트 */
-  //console.log(data); //서버쪽인 command+j의 터미널과 브라우저 개발자모드의 Console창에 두번 출력됨
-  //useEffect(()=>{ //이 코드는 서버에서는 실행이안됨. 조건 자체가 애초에 컴포넌트가 마운트 된 이후(화면에 나타난 이후)
-  //  ≈
-  //},[]);
-  console.log(allBooks);
+} : InferGetStaticPropsType<typeof getStaticProps>) { /*home 컴퍼넌트 */
   return (
     <div className={style.container}>
       <section>
@@ -53,6 +50,3 @@ Home.getLayout=(page: ReactNode ) => { //getLayout 메서드
   return <SearchableLayout>{page}</SearchableLayout>;
 }
 
-function getchRandomBooks() {
-  throw new Error("Function not implemented.");
-}

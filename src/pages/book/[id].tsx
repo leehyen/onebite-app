@@ -10,27 +10,41 @@
  [[...id]].tsx로 캐치올세그먼트를 하나 더 입혀준다. 이걸 옵셔널 캐치올 세그먼트 optional catch all segment라고 부름
 */
 
-import { GetServerSideProps, GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
+import { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import style from './[id].module.css'
 import fetchOneBook from '@/lib/fetch-one-book';
+import { useRouter } from 'next/router';
 
-const mockData={
-    id: 1,
-    title: "한 입 크기로 잘라 먹는 리액트",
-    subTitle: "자바스크립트 기초부터 애플리케이션 배포까지",
-    description: "자바스크립트 기초부터 애플리케이션 배포까지\n처음 시작하기 딱 좋은 리액트 입문서\n\n이 책은 웹 개발에서 가장 많이 사용하는 프레임워크인 리액트 사용 방법을 소개합니다. 인프런, 유데미에서 5000여 명이 수강한 베스트 강좌를 책으로 엮었습니다. 프런트엔드 개발을 희망하는 사람들을 위해 리액트의 기본을 익히고 다양한 앱을 구현하는 데 부족함이 없도록 만들었습니다. \n\n자바스크립트 기초 지식이 부족해 리액트 공부를 망설이는 분, 프런트엔드 개발을 희망하는 취준생으로 리액트가 처음인 분, 퍼블리셔나 백엔드에서 프런트엔드로 직군 전환을 꾀하거나 업무상 리액트가 필요한 분, 뷰, 스벨트 등 다른 프레임워크를 쓰고 있는데, 실용적인 리액트를 배우고 싶은 분, 신입 개발자이지만 자바스크립트나 리액트 기초가 부족한 분에게 유용할 것입니다.",
-    author: "이정환",
-    publisher: "프로그래밍인사이트",
-    coverImgUrl: "https://shopping-phinf.pstatic.net/main_3888828/38888282618.20230913071643.jpg"
+//동적경로에 ssg설정1 ) getStaticPaths : 현재 이 페이지에 존재할 수 있는는 경로들을 먼저 설정 
+export const getStaticPaths=()=>{
+  return {
+    paths:[
+      {params:{id:"1"}}, //url파라미터 값은 반드시 문자열로만 명시하기
+      {params:{id:"2"}},
+      {params:{id:"3"}},
+    ],
+
+    fallback:true,//브라우저에 접속요청 들어오면 이외의 값이 들어올때 대비책
+    //false: 404 NotFound
+    //blocking : SSR방식
+    //true : SSR방식+데이터가 없는 폴백 상태의 페이지부터 반환, (지금 당장 사용할필요가없는 Props를 제외하고 빠르게 page를 출력할수있음)
+    // props를 계산하는 getStaticProps의 호출은 생략하고 바로 Page 컴포넌트만 사전 렌더링해서 빠르게 브라우저에게 보내줌
+    //UI를 먼저 렌더링하고 데이터는 나중에 전달해줌
   };
+};
 
-export const getServerSideProps =async(
-  context:GetServerSidePropsContext
+//동적경로에 ssg설정2) getStaticProps함수를 일일이 한 번씩 다 호출해서 사전에 여러개의 페이지를 렌더링
+export const getStaticProps =async(
+  context:GetStaticPropsContext
 )=>{
   const id=context.params!.id; //.params! 에 느낌표 단언은 'undefined가 아닐거다'라는 뜻
   const book=await fetchOneBook(Number (id));
-  console.log(id);
 
+  if(!book){ //next서버가 자동으로 book데이터를 불러오지 못했을때는
+    return{
+      notFound:true, //notfound(404페이지)로
+    };
+  }
   return{
     props:{
       book
@@ -40,15 +54,13 @@ export const getServerSideProps =async(
 
 export default function Page({
   book,
-  }:InferGetServerSidePropsType<typeof getServerSideProps>){
+  }:InferGetStaticPropsType<typeof getStaticProps>){
 
-    if(!book) return "문제가 발생했습니다. 다시 시도하세요."
-   //const router=useRouter();
-   // const {id}=router.query; //[...id].tsx에서 파라미터로 전달한 /123/3/3이런 숫자들은 배열변수로 {id}에 저장됨
-   // console.log(id);
+    //fallback상태란, page컴포넌트가 아직 서버로부터 데이터를 전달받지 못한 상태
+    const router=useRouter();//데이터 있는데 진짜 로딩중일때 라우터사용해서
+    if(router.isFallback) return "로딩중입니다."//데이터 있는데 진짜 로딩중일때를 표현
     
-   // return <h1>Book {id}</h1>;
-
+    if(!book) return "문제가 발생했습니다. 다시 시도하세요."//로딩 끝났는데도 데이터가 진짜 없을때
    const {
         id,title,subTitle,description,author,publisher,coverImgUrl,
     }=book;
