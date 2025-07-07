@@ -1,0 +1,21 @@
+.searchbar_container{
+    display:flex;/*내부 내용 수평*/
+    gap: 10px; /*요소들간의 gap*/
+    margin-bottom: 20px;
+}
+
+.searchbar_container>input{
+    flex: 1;/*가로로 끝까지 늘어나게*/
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid rgb(220,220,220);
+}
+
+.searchbar_container>button{
+    width: 80px;
+    border-radius: 5px;
+    border: none;
+    background-color: rgb(37,147,255);
+    color: white;
+    cursor: pointer;
+}
