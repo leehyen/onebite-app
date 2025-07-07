@@ -10,7 +10,9 @@
  [[...id]].tsx로 캐치올세그먼트를 하나 더 입혀준다. 이걸 옵셔널 캐치올 세그먼트 optional catch all segment라고 부름
 */
 
+import { GetServerSideProps, GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
 import style from './[id].module.css'
+import fetchOneBook from '@/lib/fetch-one-book';
 
 const mockData={
     id: 1,
@@ -21,7 +23,26 @@ const mockData={
     publisher: "프로그래밍인사이트",
     coverImgUrl: "https://shopping-phinf.pstatic.net/main_3888828/38888282618.20230913071643.jpg"
   };
-export default function Page(){
+
+export const getServerSideProps =async(
+  context:GetServerSidePropsContext
+)=>{
+  const id=context.params!.id; //.params! 에 느낌표 단언은 'undefined가 아닐거다'라는 뜻
+  const book=await fetchOneBook(Number (id));
+  console.log(id);
+
+  return{
+    props:{
+      book
+    },
+  };
+};
+
+export default function Page({
+  book,
+  }:InferGetServerSidePropsType<typeof getServerSideProps>){
+
+    if(!book) return "문제가 발생했습니다. 다시 시도하세요."
    //const router=useRouter();
    // const {id}=router.query; //[...id].tsx에서 파라미터로 전달한 /123/3/3이런 숫자들은 배열변수로 {id}에 저장됨
    // console.log(id);
@@ -30,7 +51,7 @@ export default function Page(){
 
    const {
         id,title,subTitle,description,author,publisher,coverImgUrl,
-    }=mockData;
+    }=book;
 
    return (
    <div className={style.container}>
