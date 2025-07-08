@@ -4,18 +4,7 @@ import BookItem from "@/components/book-item";
 import fetchBooks from "@/lib/fetch-books";
 import { BookData } from "@/types";
 import { useRouter } from "next/router";
-
-// export const getStaticProps =async(
-//     context:GetStaticPropsContext
-// )=>{
-//     const q=context.query.q;
-//     const books=await fetchBooks(q as string);
-//     return{
-//         props:{
-//             books,
-//         },
-//     };
-// };
+import Head from "next/head";
 
 export default function Page(){
     const [books, setBooks]=useState<BookData[]>([])
@@ -27,12 +16,18 @@ export default function Page(){
         setBooks(data);
     };
     useEffect(()=>{
-      if(q){ //검색어있다면
+      if(q){ 
             fetchSearchResult();
         }
     },[q]);
     return(
         <div>
+            <Head>
+                <title>한입북스 - 검색결과</title>
+                <meta property="og:image" content="/thumbnail.png"/>
+                <meta property="og:title" content="한입북스 - 검색결과"/>
+                <meta property="og:description" content="한입 북스에 등록된 도서들을 만나보세요"/>
+            </Head>
             {books.map((book)=>(
                 <BookItem key={book.id} {...book}/>
             ))}
@@ -40,7 +35,6 @@ export default function Page(){
     ); 
 }
 
-//페이지별 개별 레이아웃 설정하고싶으면 
 Page.getLayout=(page:ReactNode)=>{
     return <SearchableLayout>{page}</SearchableLayout>;
 }
