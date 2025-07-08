@@ -22,7 +22,8 @@ export const getStaticProps=async()=>{
     props:{ //객체 형태의 프롭스 형태여야 페이지 역할을 하는 home 컴퍼넌트에게 전달가능함
       allBooks,
       recoBooks,
-    }
+    },
+    revalidate : 3, //revalidate : 재검증하다
   }
   //window.location; //javascript의 window는 브라우저를 의미함.
 };
