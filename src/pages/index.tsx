@@ -23,7 +23,6 @@ export const getStaticProps=async()=>{
       allBooks,
       recoBooks,
     },
-    revalidate : 3, //revalidate : 재검증하다
   }
   //window.location; //javascript의 window는 브라우저를 의미함.
 };
